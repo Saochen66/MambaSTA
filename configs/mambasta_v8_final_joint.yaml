@@ -1,0 +1,48 @@
+study: mambasta_v8_final_joint_20261012
+protocol_id: v8_final_joint_20261012
+selection_source: validation_only
+split_seed: 42
+model_seeds: [42, 123, 2026]
+test_sessions: [0, 1, 2]
+optimization_fit_hard_cap: 6500
+debug_hard_cap: 24
+deployment_parameter_target: 50000
+deployment_parameter_hard_cap: 100000
+disk_stop_threshold_gib: 100
+test_access_before_freeze: false
+local_sta_net_training: false
+event_onset_confirmed: false
+real_hrf_claims_enabled: false
+model:
+  d_model: 32
+  d_state: 8
+  d_conv: 4
+  expand: 2
+  query_rank: 8
+  dropout: 0.2
+training:
+  max_epochs_t1: 40
+  patience: 10
+  batch_size: 8
+  head_lr: 0.001
+  weight_decay: 0.0001
+  gradient_clip: 1.0
+  kd_weight: 0.5
+  interaction_penalty: 0.001
+  temperature: 2.0
+paths:
+  experiment_root: experiments/mambasta_v8_final_joint_20261012
+  v3_root: experiments/mambasta_v3_20261004
+  v4_root: experiments/mambasta_v4_alignment_20261005
+  v5_root: experiments/mambasta_v5_final_20261006
+  wg_raw: mat2array
+  mi_raw: mat2array_multitask/mi
+  ma_raw: mat2array_multitask/ma
+  mamba_python: D:/code/envs/mamba/python.exe
+  preprocessing_python: D:/code/envs/ssvep/python.exe
+paper_reference:
+  wg_accuracy: 0.7903
+  mi_accuracy: 0.6965
+  ma_accuracy: 0.8514
+  doi: 10.1016/j.inffus.2025.103023
+
