@@ -1,0 +1,45 @@
+study: mambasta_release
+public_model_name: MambaSTA
+implementation_id: J1_R4
+selection_source: validation_only
+split_seed: 42
+available_model_seeds: [42, 123, 2026]
+reported_execution:
+  model_seed: 42
+  repetitions: 1
+  note: Results in the accompanying report use seed 42 only.
+test_sessions: [0, 1, 2]
+test_access_before_freeze: false
+local_sta_net_training: false
+event_onset_confirmed: false
+real_hrf_claims_enabled: false
+
+model:
+  d_model: 32
+  d_state: 8
+  d_conv: 4
+  expand: 2
+  query_rank: 8
+  dropout: 0.2
+
+training:
+  max_epochs: 80
+  patience: 10
+  batch_size: 64
+  head_lr: 0.001
+  weight_decay: 0.0001
+  gradient_clip: 1.0
+  kd_weight: 0.5
+  interaction_penalty: 0.001
+  temperature: 2.0
+  checkpoint_metric: validation_nll
+
+paths:
+  data_root: data
+  experiment_root: experiments/mambasta_release
+  python: python
+
+limits:
+  disk_stop_threshold_gib: 100
+  deployment_parameter_target: 50000
+  deployment_parameter_hard_cap: 100000

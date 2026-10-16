@@ -1,57 +1,78 @@
-# MambaSTA V8
+# MambaSTA
 
-Source code and configuration for the MambaSTA V8 `J1_R4` multimodal EEG-fNIRS model.
+MambaSTA is a multimodal EEG-fNIRS classifier. The released implementation is
+the validation-selected `J1_R4` model: frozen modality encoders feed a compact,
+reference-centred joint head with EEG and fNIRS main effects plus a rank-4
+cross-modal interaction.
 
-## Architecture
+## Model
 
-`J1_R4` keeps the frozen B_M50 EEG and fNIRS feature branches and replaces probability averaging with a single reference-centred joint classifier. The deployed head combines:
+For EEG feature vector `e`, fNIRS feature vector `n`, and learned reference
+vectors `e0` and `n0`, the classifier contains:
 
-- an EEG main effect;
-- an fNIRS main effect;
-- a rank-4 EEG-fNIRS interaction term.
+- an EEG main-effect term;
+- an fNIRS main-effect term;
+- a low-rank interaction between `(e - e0)` and `(n - n0)`;
+- one shared class-logit output.
 
-B_M50 probabilities are used only as a training teacher and do not enter the deployed joint logits.
+The historical B_M50 model supplies frozen encoders and training-time teacher
+probabilities. Its probabilities are not averaged into the released inference
+logits. `models/mambasta.py` is the stable public model entry point.
 
 ## Repository contents
 
-- `models/`: V8 model and inherited backbone dependencies.
-- `training/`: cached-feature, staged, baseline and shared training utilities.
-- `tools/`: V8 orchestration, frozen evaluation and preprocessing entry points.
-- `configs/`: the frozen experiment configuration and a portable path template.
+- `models/`: MambaSTA and the inherited encoder dependencies.
+- `training/`: cached-feature and staged training utilities.
+- `tools/`: preprocessing, fitting and frozen-evaluation entry points.
+- `configs/final.yaml`: portable three-seed reproduction configuration with
+  seed 42 marked as the sole reported execution.
+- `configs/ablation.yaml`: predeclared inference-ablation configuration.
 
-No datasets, checkpoints, prediction files, experiment outputs or logs are included.
-
-## Configuration
-
-Copy `configs/mambasta_v8_portable.example.yaml` and update the dataset, experiment and Python paths for your system. The frozen configuration is retained separately for protocol transparency.
-
-The expected evaluation protocol uses three held-out sessions and seeds `42`, `123` and `2026`. Model selection is validation-only; test outputs must not be generated before the selection freeze.
+This repository intentionally contains code and configuration only. It does
+not contain datasets, subject identifiers, checkpoints, cached features,
+predictions, result tables, experiment logs, or private absolute paths.
 
 ## Installation
 
+Create an environment compatible with your CUDA/PyTorch installation, then:
+
 ```bash
-python -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-Install `mamba-ssm` and `causal-conv1d` only when compatible accelerated kernels are available for the local PyTorch/CUDA environment.
+The Mamba encoder requires compatible `mamba-ssm` and `causal-conv1d`
+packages. The implementation does not silently replace Mamba with another
+architecture.
 
-## Entry points
+## Configuration and protocol
+
+Copy `configs/final.yaml`, then set local data and output paths outside the
+repository. The public configuration exposes seeds `42`, `123`, and `2026`
+for independent reproduction. The reported experiment in this release was
+actually executed once with seed `42` only; it is not a three-seed robustness
+study. It uses three held-out sessions, validation-only model selection, and
+a test freeze before test export.
+
+The ablation configuration defines four evaluations from the same frozen
+checkpoint: full fusion, interaction removal, EEG-reference intervention, and
+fNIRS-reference intervention. The reference interventions are diagnostic
+inference ablations, not independently retrained unimodal networks.
+
+The public trainers consume a per-fold JSON contract derived from
+`configs/final.yaml`. Set `model_seed` to one of the three published values;
+use `42` to reproduce the metrics reported in this release.
+
+Useful entry points include:
 
 ```bash
-python tools/v8_run.py --help
-python tools/v8_s1.py --help
-python tools/v8_optimize.py --help
-python tools/v8_finalize.py --help
+python -m training.train_v8_cached --help
+python -m training.train_v8_staged --help
 ```
 
-The MI/MA validation-selected Top10 extension is available through:
+## Data and claims
 
-```bash
-python tools/v8_mi_ma_top10_extension.py --help
-```
-
-## Data
-
-The dataset is not redistributed in this repository. Prepare locally authorized EEG-fNIRS data and point a copied portable configuration to those paths.
+The EEG-fNIRS datasets are not redistributed. Users must obtain authorized
+copies and reproduce the preprocessing contract locally. Event-onset timing
+was not independently established in this release, so the model outputs must
+not be interpreted as causal or true-HRF/physiological-peak evidence.
 

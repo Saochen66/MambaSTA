@@ -1,0 +1,15 @@
+public_model_name: MambaSTA
+implementation_id: J1_R4
+reported_model_seed: 42
+available_model_seeds: [42, 123, 2026]
+scopes: [fixed_top10, all_available_subjects]
+inference_roles:
+  - FULL
+  - NO_CROSS
+  - EEG_REFERENCE
+  - FNIRS_REFERENCE
+interpretation:
+  inference_roles_are_retrained_models: false
+  top10_is_population_estimate: false
+  cross_seed_robustness_claims_allowed: false
+  event_onset_confirmed: false

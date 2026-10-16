@@ -4,9 +4,6 @@ torch
 einops
 mne
 mne-icalabel
-
-# Optional accelerated kernels used when available. The implementation has
-# fallback paths, so install versions compatible with your PyTorch/CUDA stack.
-# mamba-ssm
-# causal-conv1d
+mamba-ssm
+causal-conv1d
 
